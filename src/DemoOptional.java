@@ -1,7 +1,8 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,7 +14,35 @@ public class DemoOptional {
 		return Arrays.asList(1, 2, 3, 4, 5, 6, 7);
 
 	}
-	
+
+	public Double suma(Double s1, Double s2) {
+		if (s1 == null) throw new RuntimeException("Uno de los sumandos es nulo");
+
+		if (s2 == null) throw new RuntimeException("Uno de los sumandos es nulo");
+
+		return s1 + s2;
+	}
+
+	public Double sumaFunctional(Double s1, Double s2) {
+		DoubleBinaryOperator add = Double::sum;
+
+		return Optional.ofNullable(s1)
+				.map(d1 -> Optional.ofNullable(s2)
+						.map(d2 -> add.applyAsDouble(d1, d2))
+						.orElseThrow(() -> new RuntimeException("Uno de los sumandos es nulo")))
+				.orElseThrow(() -> new RuntimeException("Uno de los sumandos es nulo"));
+	}
+
+
+	public Double sumaFunctional2(Double s1, Double s2) {
+		DoubleBinaryOperator add = Double::sum;
+
+		return Optional.ofNullable(s1)
+				.flatMap(d1 -> Optional.ofNullable(s2)
+						.map(d2 -> add.applyAsDouble(d1, d2)))
+				.orElseThrow(() -> new RuntimeException("Uno de los sumandos es nulo"));
+	}
+
 	public static void main(String[] args) {
 		DemoOptional d = new DemoOptional();
 
@@ -53,6 +82,15 @@ public class DemoOptional {
 										.orElseGet(ArrayList::new);
 		
 		lIntMayCuatro.stream().forEach(System.out::println);
+
+
+		System.out.println("--------------");
+
+		System.out.println("Suma (10, 20) -> " + d.suma(10.0, 20.0));
+
+		System.out.println("Suma FUNC (10, 20) -> " + d.sumaFunctional(10.0, 20.0));
+
+		System.out.println("Suma FUNC (10, 20) -> " + d.sumaFunctional2(10.0, 20.0));
 	}
 
 }
